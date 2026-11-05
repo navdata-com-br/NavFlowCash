@@ -1,5 +1,6 @@
 package br.com.navdata.flowcash.service;
 
+import br.com.navdata.flowcash.dto.request.LoginRequest;
 import br.com.navdata.flowcash.dto.request.PaymentTransactionRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -20,19 +21,58 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 
 @Service
-public class AuthPaymentClient {
+public class AuthApiClient {
 
     private static final String PAYMENTS_PATH = "/api/v1/payments";
+    private static final String AUTH_LOGIN_PATH = "/api/v1/auth/login";
+    private static final String AUTH_ME_PATH = "/api/v1/auth/me";
+    private static final String AUTH_VALIDATE_PATH = "/api/v1/auth/validate";
 
     private final RestTemplate restTemplate;
     private final String authApiBaseUrl;
 
-    public AuthPaymentClient(
+    public AuthApiClient(
             RestTemplateBuilder restTemplateBuilder,
             @Value("${auth.api.base-url}") String authApiBaseUrl
     ) {
         this.restTemplate = restTemplateBuilder.build();
         this.authApiBaseUrl = authApiBaseUrl.replaceAll("/+$", "");
+    }
+
+    public ResponseEntity<String> login(LoginRequest login, String systemName) {
+        URI uri = UriComponentsBuilder.fromUriString(authApiBaseUrl)
+                .path(AUTH_LOGIN_PATH)
+                .build()
+                .toUri();
+        return forward(
+                HttpMethod.POST,
+                uri,
+                java.util.Map.of("email", login.email(), "password", login.password()),
+                null,
+                systemName
+        );
+    }
+
+    public ResponseEntity<String> validateToken(String token, String systemName) {
+        URI uri = UriComponentsBuilder.fromUriString(authApiBaseUrl)
+                .path(AUTH_VALIDATE_PATH)
+                .build()
+                .toUri();
+        return forward(
+                HttpMethod.POST,
+                uri,
+                java.util.Map.of("token", token),
+                null,
+                systemName
+        );
+    }
+
+    public ResponseEntity<String> getAuthenticatedUser(String authorization, String systemName) {
+        URI uri = UriComponentsBuilder.fromUriString(authApiBaseUrl)
+                .path(AUTH_ME_PATH)
+                .build()
+                .toUri();
+        return forward(HttpMethod.GET, uri, null, authorization, systemName);
     }
 
     public ResponseEntity<String> createPayment(
@@ -82,7 +122,9 @@ public class AuthPaymentClient {
             String systemName
     ) {
         HttpHeaders headers = new HttpHeaders();
-        headers.set(HttpHeaders.AUTHORIZATION, authorization);
+        if (authorization != null && !authorization.isBlank()) {
+            headers.set(HttpHeaders.AUTHORIZATION, authorization);
+        }
         headers.set("X-System-Name", systemName);
         headers.setAccept(java.util.List.of(MediaType.APPLICATION_JSON));
         if (body != null) {
@@ -118,8 +160,11 @@ public class AuthPaymentClient {
             String body
     ) {
         MediaType contentType = headers != null ? headers.getContentType() : null;
-        return ResponseEntity.status(status)
-                .contentType(contentType != null ? contentType : MediaType.APPLICATION_JSON)
-                .body(body);
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.setContentType(contentType != null ? contentType : MediaType.APPLICATION_JSON);
+        if (headers != null && headers.containsKey(HttpHeaders.SET_COOKIE)) {
+            responseHeaders.put(HttpHeaders.SET_COOKIE, headers.get(HttpHeaders.SET_COOKIE));
+        }
+        return new ResponseEntity<>(body, responseHeaders, status);
     }
 }

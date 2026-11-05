@@ -11,6 +11,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -47,10 +50,6 @@ public class CategoryService {
 
     @Transactional
     public void seedDefaultCategories(String userId) {
-        if (!categoryRepository.findByUserIdOrderByNameAsc(userId).isEmpty()) {
-            return;
-        }
-
         List<CategoryEntity> defaults = List.of(
             CategoryEntity.builder().userId(userId).name("Alimentação").type(TransactionType.EXPENSE).icon("Utensils").color("#ef4444").build(),
             CategoryEntity.builder().userId(userId).name("Moradia").type(TransactionType.EXPENSE).icon("Home").color("#f97316").build(),
@@ -64,6 +63,20 @@ public class CategoryService {
             CategoryEntity.builder().userId(userId).name("Outros").type(TransactionType.INCOME).icon("PlusCircle").color("#64748b").build()
         );
 
-        categoryRepository.saveAll(defaults);
+        Set<String> existingCategories = categoryRepository.findByUserIdOrderByNameAsc(userId).stream()
+                .map(category -> categoryKey(category.getName(), category.getType()))
+                .collect(Collectors.toSet());
+
+        List<CategoryEntity> missingDefaults = defaults.stream()
+                .filter(category -> !existingCategories.contains(categoryKey(category.getName(), category.getType())))
+                .toList();
+
+        if (!missingDefaults.isEmpty()) {
+            categoryRepository.saveAll(missingDefaults);
+        }
+    }
+
+    private String categoryKey(String name, TransactionType type) {
+        return name.trim().toLowerCase(Locale.ROOT) + ":" + type.name();
     }
 }

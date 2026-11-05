@@ -28,11 +28,10 @@ public class UserService {
                     .accessUntil(LocalDateTime.now().plusDays(7))
                     .categoriesSeeded(false)
                     .build();
-            UserEntity saved = userRepository.save(newUser);
-            categoryService.seedDefaultCategories(userId);
-            return saved;
+            return userRepository.save(newUser);
         });
 
+        categoryService.seedDefaultCategories(userId);
         user.setLastAccess(LocalDateTime.now());
         if (displayName != null) user.setDisplayName(displayName);
         if (photoUrl != null) user.setPhotoUrl(photoUrl);

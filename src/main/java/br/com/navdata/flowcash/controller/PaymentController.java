@@ -1,7 +1,7 @@
 package br.com.navdata.flowcash.controller;
 
 import br.com.navdata.flowcash.dto.request.PaymentTransactionRequest;
-import br.com.navdata.flowcash.service.AuthPaymentClient;
+import br.com.navdata.flowcash.service.AuthApiClient;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class PaymentController {
 
-    private final AuthPaymentClient authPaymentClient;
+    private final AuthApiClient authApiClient;
 
     @PostMapping
     public ResponseEntity<String> create(
@@ -21,7 +21,7 @@ public class PaymentController {
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization,
             @RequestHeader("X-System-Name") String systemName
     ) {
-        return authPaymentClient.createPayment(payment, authorization, systemName);
+        return authApiClient.createPayment(payment, authorization, systemName);
     }
 
     @GetMapping("/company/{systemUnitId}")
@@ -30,7 +30,7 @@ public class PaymentController {
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization,
             @RequestHeader("X-System-Name") String systemName
     ) {
-        return authPaymentClient.listByCompany(systemUnitId, authorization, systemName);
+        return authApiClient.listByCompany(systemUnitId, authorization, systemName);
     }
 
     @GetMapping("/system/{systemName}")
@@ -38,6 +38,6 @@ public class PaymentController {
             @PathVariable String systemName,
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization
     ) {
-        return authPaymentClient.listBySystem(systemName, authorization);
+        return authApiClient.listBySystem(systemName, authorization);
     }
 }

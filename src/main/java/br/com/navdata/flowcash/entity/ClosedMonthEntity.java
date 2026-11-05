@@ -20,7 +20,7 @@ public class ClosedMonthEntity {
     @Column(name = "user_id", nullable = false)
     private String userId;
 
-    @Column(nullable = false)
+    @Column(name = "closed_month", nullable = false)
     private LocalDateTime month;
 
     @Column(name = "closed_at", nullable = false)
