@@ -1,6 +1,7 @@
 package br.com.navdata.flowcash.controller;
 
 import br.com.navdata.flowcash.dto.request.LoginRequest;
+import br.com.navdata.flowcash.dto.request.RegisterCompanyRequest;
 import br.com.navdata.flowcash.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,17 @@ public class AuthController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sistema não informado");
         }
         return authService.login(request, systemName);
+    }
+
+    @PostMapping("/register-company")
+    public ResponseEntity<String> registerCompany(
+            @Valid @RequestBody RegisterCompanyRequest request,
+            @RequestHeader(value = "X-System-Name", required = false) String systemNameHeader
+    ) {
+        if (systemNameHeader == null || systemNameHeader.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sistema não informado");
+        }
+        return authService.registerCompany(request, systemNameHeader.trim());
     }
 
     @GetMapping("/me")

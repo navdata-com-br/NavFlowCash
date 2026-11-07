@@ -24,6 +24,7 @@ import java.util.Map;
 public class AuthTokenValidationFilter extends OncePerRequestFilter {
 
     private static final String LOGIN_PATH = "/api/v1/auth/login";
+    private static final String REGISTER_COMPANY_PATH = "/api/v1/auth/register-company";
     private static final String SYSTEM_NAME_HEADER = "X-System-Name";
 
     private final AuthApiClient authApiClient;
@@ -39,7 +40,8 @@ public class AuthTokenValidationFilter extends OncePerRequestFilter {
         String path = request.getRequestURI().substring(request.getContextPath().length());
         return request.getDispatcherType() == DispatcherType.ERROR
                 || "OPTIONS".equalsIgnoreCase(request.getMethod())
-                || ("POST".equalsIgnoreCase(request.getMethod()) && LOGIN_PATH.equals(path));
+                || ("POST".equalsIgnoreCase(request.getMethod())
+                    && (LOGIN_PATH.equals(path) || REGISTER_COMPANY_PATH.equals(path)));
     }
 
     @Override

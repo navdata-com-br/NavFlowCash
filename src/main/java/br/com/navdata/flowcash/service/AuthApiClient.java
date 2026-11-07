@@ -2,6 +2,7 @@ package br.com.navdata.flowcash.service;
 
 import br.com.navdata.flowcash.dto.request.LoginRequest;
 import br.com.navdata.flowcash.dto.request.PaymentTransactionRequest;
+import br.com.navdata.flowcash.dto.request.RegisterCompanyRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
@@ -25,6 +26,7 @@ public class AuthApiClient {
 
     private static final String PAYMENTS_PATH = "/api/v1/payments";
     private static final String AUTH_LOGIN_PATH = "/api/v1/auth/login";
+    private static final String AUTH_REGISTER_COMPANY_PATH = "/api/v1/auth/register-company";
     private static final String AUTH_ME_PATH = "/api/v1/auth/me";
     private static final String AUTH_VALIDATE_PATH = "/api/v1/auth/validate";
 
@@ -51,6 +53,14 @@ public class AuthApiClient {
                 null,
                 systemName
         );
+    }
+
+    public ResponseEntity<String> registerCompany(RegisterCompanyRequest request, String systemName) {
+        URI uri = UriComponentsBuilder.fromUriString(authApiBaseUrl)
+                .path(AUTH_REGISTER_COMPANY_PATH)
+                .build()
+                .toUri();
+        return forward(HttpMethod.POST, uri, request, null, systemName);
     }
 
     public ResponseEntity<String> validateToken(String token, String systemName) {

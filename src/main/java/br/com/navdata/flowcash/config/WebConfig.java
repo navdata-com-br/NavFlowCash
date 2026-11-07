@@ -12,7 +12,7 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addMapping("/**")
                 .allowedOrigins(
                     "https://flowcash.navdata.com.br",
-                    "http://localhost:3000",
+                    "http://localhost:3001",
                     "capacitor://localhost",
                     "http://localhost"
                 )

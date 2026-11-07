@@ -4,7 +4,6 @@ import br.com.navdata.flowcash.dto.request.AccountRequest;
 import br.com.navdata.flowcash.dto.response.AccountResponse;
 import br.com.navdata.flowcash.service.AccountService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,10 +12,13 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/accounts")
-@RequiredArgsConstructor
 public class AccountController {
 
     private final AccountService accountService;
+
+    public AccountController(AccountService accountService) {
+        this.accountService = accountService;
+    }
 
     @GetMapping
     public ResponseEntity<List<AccountResponse>> list(@RequestHeader("X-User-Id") String userId) {

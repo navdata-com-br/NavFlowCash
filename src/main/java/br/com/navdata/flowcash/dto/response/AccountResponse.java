@@ -23,4 +23,6 @@ public record AccountResponse(
             entity.getColor()
         );
     }
+    
+    
 }
